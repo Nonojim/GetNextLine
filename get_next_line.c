@@ -6,55 +6,16 @@
 /*   By: npederen <npederen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/14 16:48:43 by npederen          #+#    #+#             */
-/*   Updated: 2025/01/14 16:48:43 by npederen         ###   ########.fr       */
+/*   Updated: 2025/01/27 20:04:19 by npederen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*get_next_line(int fd)
+char	*get_new_line(char *stash, char	*line)
 {
-	static char	*stash;
-	char		*line;
-	char		*buffer;
-	ssize_t		nbytes;
-	char		*tmp;
+	ssize_t	nbytes;
 
-	line = NULL;
-	nbytes = 1;
-	buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
-	if (!buffer)
-		return(NULL);
-	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
-	{
-		free(stash);
-		free(buffer);
-		stash = NULL;
-		buffer = NULL;
-		return (NULL);
-	}
-	if (!stash)
-		stash = ft_strdup("");
-	while (nbytes > 0)
-	{
-		nbytes = read(fd, buffer, BUFFER_SIZE);
-		if(nbytes == -1)
-		{
-			free(buffer);
-			return (NULL);
-		}
-		buffer[nbytes] = '\0';
-		stash = ft_strjoin(stash, buffer);
-		if ((ft_strchr(buffer, '\n')))
-			break ;
-	}
-	free(buffer);
-	if (*stash == '\0')
-		{
-			free(stash);
-			stash = NULL;
-			return (NULL);
-		}
 	nbytes = 0;
 	while (stash[nbytes] != '\n' && stash[nbytes] != '\0')
 		nbytes++;
@@ -70,6 +31,39 @@ char	*get_next_line(int fd)
 		line[nbytes] = stash[nbytes];
 		nbytes--;
 	}
+	return (line);
+}
+
+char	*init_stash(int fd, char *stash, char *buffer)
+{
+	ssize_t		nbytes;
+
+	nbytes = 1;
+	if (!stash)
+		stash = ft_strdup("");
+	while (nbytes > 0)
+	{
+		nbytes = read(fd, buffer, BUFFER_SIZE);
+		if (nbytes == -1)
+		{
+			free(buffer);
+			return (NULL);
+		}
+		buffer[nbytes] = '\0';
+		stash = ft_strjoin(stash, buffer);
+		if ((ft_strchr(buffer, '\n')))
+			break ;
+	}
+	free(buffer);
+	return (stash);
+}
+
+char	*get_new_stash(char *stash)
+{
+	ssize_t		nbytes;
+	char		*tmp;
+	int			i;
+
 	nbytes = 0;
 	while (stash[nbytes] != '\n' && stash[nbytes] != '\0')
 		nbytes++;
@@ -78,7 +72,6 @@ char	*get_next_line(int fd)
 	tmp = malloc((ft_strlen(stash) - nbytes + 1) * sizeof(char));
 	if (!tmp)
 		return (NULL);
-	int	i;
 	i = 0;
 	while (stash[nbytes])
 	{
@@ -89,9 +82,36 @@ char	*get_next_line(int fd)
 	free(stash);
 	tmp[i] = '\0';
 	stash = tmp;
-	return(line);
+	return (stash);
 }
 
+char	*get_next_line(int fd)
+{
+	static char	*stash;
+	char		*line;
+	char		*buffer;
+
+	line = NULL;
+	buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+	{
+		free(stash);
+		free(buffer);
+		stash = NULL;
+		buffer = NULL;
+		return (NULL);
+	}
+	stash = init_stash(fd, stash, buffer);
+	if (*stash == '\0')
+	{
+		free(stash);
+		stash = NULL;
+		return (NULL);
+	}
+	line = get_new_line (stash, line);
+	stash = get_new_stash (stash);
+	return (line);
+}
 /*int	main(void)
 {
 	int		fd;

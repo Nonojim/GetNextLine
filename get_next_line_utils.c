@@ -6,7 +6,7 @@
 /*   By: npederen <npederen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/14 16:48:16 by npederen          #+#    #+#             */
-/*   Updated: 2025/01/14 16:48:16 by npederen         ###   ########.fr       */
+/*   Updated: 2025/01/27 18:26:27 by npederen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,4 +78,3 @@ char	*ft_strjoin(char *s1, const char *s2)
 	free (s1);
 	return (str);
 }
-
